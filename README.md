@@ -83,13 +83,23 @@ dsh plugin --profile desktop add dsh-qq-plugin-group-expand
 ```
 
 <details open>
+<summary><b>From GitHub (works today)</b></summary>
+
+```
+https://github.com/jjjjjsgrmjjjjj/dsh-qq-plugin-group-expand
+```
+
+Paste that Git URL into 「添加插件」. The installed plugin name is `dsh-qq-plugin-group-expand`.
+</details>
+
+<details>
 <summary><b>From npm</b> — nothing to configure</summary>
 
 ```
 dsh-qq-plugin-group-expand
 ```
 
-Add a version if you need one: `dsh-qq-plugin-group-expand@1.1.0`.
+Add a version if you need one: `dsh-qq-plugin-group-expand@1.2.0`.
 </details>
 
 <details>
@@ -108,7 +118,7 @@ declares is `dsh-qq-plugin-group-expand`.
 
 ```bash
 npm pack
-# → dsh-qq-plugin-group-expand-1.1.0.tgz
+# → dsh-qq-plugin-group-expand-1.2.0.tgz
 ```
 
 Paste the absolute path to that `.tgz` into **添加插件**.

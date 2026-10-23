@@ -70,13 +70,23 @@ dsh plugin --profile desktop add dsh-qq-plugin-group-expand
 ```
 
 <details open>
+<summary><b>从 GitHub 装（当前可用）</b></summary>
+
+```
+https://github.com/jjjjjsgrmjjjjj/dsh-qq-plugin-group-expand
+```
+
+把这段 Git 地址粘进「添加插件」。装好之后插件名就是 `dsh-qq-plugin-group-expand`。
+</details>
+
+<details>
 <summary><b>从 npm 装</b> —— 不用配置任何东西</summary>
 
 ```
 dsh-qq-plugin-group-expand
 ```
 
-需要指定版本就写 `dsh-qq-plugin-group-expand@1.1.0`。
+需要指定版本就写 `dsh-qq-plugin-group-expand@1.2.0`。
 </details>
 
 <details>
@@ -94,7 +104,7 @@ C:\path\to\dsh-qq
 
 ```bash
 npm pack
-# → dsh-qq-plugin-group-expand-1.1.0.tgz
+# → dsh-qq-plugin-group-expand-1.2.0.tgz
 ```
 
 把那个 `.tgz` 的绝对路径粘进 **添加插件**。
