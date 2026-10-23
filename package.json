@@ -12,7 +12,9 @@
     "chatbot",
     "channel",
     "plugin",
-    "remote-control"
+    "remote-control",
+    "dsh-plugin",
+    "cordis"
   ],
   "homepage": "https://github.com/jjjjjsgrmjjjjj/dsh-qq-plugin-group-expand#readme",
   "repository": {
