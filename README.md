@@ -1,11 +1,6 @@
 # dsh-qq-plugin-group-expand
 
-<p align="center"><b>中文</b> ｜ <b>English</b> — 点下面的按钮切换语言 · click a button below to switch</p>
-
-> GitHub README 不能运行 JavaScript；这里用可折叠按钮做语言切换。
-
-<details open name="readme-lang">
-<summary><b>🇨🇳 中文</b>（点击收起 / 展开）</summary>
+# 中文
 
 
 把 QQ 变成 DeepSeek Harness（DSH）的远程入口，并在上游 `dsh-qq-plugin` 的基础上补上**群聊能力**。
@@ -222,10 +217,9 @@ node scripts/verify-send-path.mjs
 
 MIT License。上游项目：[`xcisxc29/dsh-qq-plugin`](https://github.com/xcisxc29/dsh-qq-plugin)。本分支的群聊、表情包、引用图片、权限默认值与 token 优化在上面继续演进；问题请提到本仓库的 Issues。
 
-</details>
+---
 
-<details name="readme-lang">
-<summary><b>🇬🇧 English</b>（click to expand / collapse）</summary>
+# English
 
 ## Overview
 
@@ -442,5 +436,3 @@ Current results: **836** host checks, **113** client checks, **81** send-path ch
 ## License and credits
 
 MIT License. Upstream: [`xcisxc29/dsh-qq-plugin`](https://github.com/xcisxc29/dsh-qq-plugin). Group chat, stickers, quoted images, permission defaults and token savings are developed on top of it in this fork; please file issues in this repository.
-
-</details>
