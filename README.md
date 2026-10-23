@@ -1,5 +1,13 @@
 # dsh-qq-plugin-group-expand
 
+<p align="center"><b>中文</b> ｜ <b>English</b> — 点下面的按钮切换语言 · click a button below to switch</p>
+
+> GitHub README 不能运行 JavaScript；这里用可折叠按钮做语言切换。
+
+<details open name="readme-lang">
+<summary><b>🇨🇳 中文</b>（点击收起 / 展开）</summary>
+
+
 把 QQ 变成 DeepSeek Harness（DSH）的远程入口，并在上游 `dsh-qq-plugin` 的基础上补上**群聊能力**。
 
 本项目是基于 [`xcisxc29/dsh-qq-plugin`](https://github.com/xcisxc29/dsh-qq-plugin) 的扩展分支，不是从零重写。私聊遥控、扫码绑定、多会话、附件、审批、主动推送等能力来自上游；本仓库的增量集中在群聊、群聊礼仪、引用图片、表情包、权限默认值与 token 优化。
@@ -213,3 +221,226 @@ node scripts/verify-send-path.mjs
 ## 许可与致谢
 
 MIT License。上游项目：[`xcisxc29/dsh-qq-plugin`](https://github.com/xcisxc29/dsh-qq-plugin)。本分支的群聊、表情包、引用图片、权限默认值与 token 优化在上面继续演进；问题请提到本仓库的 Issues。
+
+</details>
+
+<details name="readme-lang">
+<summary><b>🇬🇧 English</b>（click to expand / collapse）</summary>
+
+## Overview
+
+A QQ channel for DeepSeek Harness (DSH), extending the upstream `dsh-qq-plugin` with **group-chat support**.
+
+This project is a derivative of [`xcisxc29/dsh-qq-plugin`](https://github.com/xcisxc29/dsh-qq-plugin), not a rewrite. Direct-message remote control, QR binding, multiple sessions, attachments, approvals and proactive push come from upstream. The additions here are group chat, group etiquette, quoted images, stickers, safer permission defaults and token savings.
+
+- Package: `dsh-qq-plugin-group-expand`
+- Version: `1.2.0`
+- Runtime: DSH desktop `0.2.0-rc.2` or newer
+- QQ side: Tencent's official bot platform, created by QR scan; no personal-account protocol and no public IP
+
+## Relationship to upstream
+
+| Feature | Upstream `dsh-qq-plugin` | This repository |
+|---|---|---|
+| Direct-message remote control | ✅ | ✅ inherited |
+| QR binding / credential service | ✅ | ✅ inherited |
+| Multiple sessions and `/new` `/list` `/switch` | ✅ | ✅ inherited |
+| Images / files / voice | ✅ | ✅ inherited |
+| Permission approvals back to QQ | ✅ | ✅ inherited |
+| `notify_qq` proactive push | ✅ | ✅ inherited |
+| Group chat | ❌ | ✅ added |
+| Group persona gate / 5-minute follow-up | ❌ | ✅ added |
+| Group sticker collection | ❌ | ✅ added |
+| Images inside quoted messages | placeholder only | ✅ downloaded and exposed as a local path |
+| New sessions read-only by default | configurable | ✅ locked to read-only by default |
+| Channel-note token usage | repeated on every message | ✅ sent once per new conversation |
+
+The upstream user handbook, settings and design notes still apply: [`docs/HANDBOOK-USER.md`](docs/HANDBOOK-USER.md). This README only covers what the fork is, what it adds, how to install it and where the boundaries are.
+
+## Features
+
+### Direct messages
+
+- Bind the official bot once by scanning a QR code from mobile QQ;
+- One QQ conversation maps to multiple DSH sessions, with `/new`, `/list`, `/switch`, `/current`, `/cancel` and `/help`;
+- Text, images, files and voice in both directions; voice prefers QQ's server-side ASR transcript;
+- Permission prompts and single/multiple-choice questions come back to QQ; answer with “allow / deny” or a number;
+- Any DSH session can push through `notify_qq`;
+- Long replies are sent as a `.md` file rather than truncated.
+
+### Group chat (the focus of this fork)
+
+Groups have different etiquette from direct messages. By default this fork speaks only when:
+
+| Condition | Behaviour |
+|---|---|
+| Mentioned with @ | Handed to the agent and answered immediately |
+| Within 5 minutes after an @ | Every **text** message is handed to the agent, which decides whether to reply |
+| Persona name or a conversation keyword appears | A short local line plus a sticker; no model call |
+| Otherwise | Silent |
+
+An @ opens a 5-minute continuous-conversation window. Inside the window there is **no keyword filter**: messages go to the agent as-is, together with the last 8 group messages (sender + text, each truncated to 120 characters), and the model decides whether the message is addressed to it.
+
+If the message is unrelated, the agent outputs `[[NO_REPLY]]`; the plugin drops the whole reply and sends nothing to the group. A stream fragment split into `[[NO_` / `[[NO_RE` is also treated as silence, so a half marker never leaks into the group.
+
+The window does not slide: only a new @ renews it; ordinary chatter cannot extend it forever.
+
+### Stickers
+
+No generated stickers. Two sources only:
+
+- Square, sticker-like images posted in the group are downloaded silently into `~/.dsh/qq/stickers/collected/`;
+- User-imported `png/jpg/gif/webp` files in the root of `~/.dsh/qq/stickers/`.
+
+Collection checks: longest edge ≤ 1024, aspect ratio 0.45–2.2, file ≤ 2 MiB, SHA-256 deduplication, at most 300 images, with an `index.json`. Phone photos and screenshots are excluded. If sending fails or the directory is empty, the plugin falls back to emoji without breaking text replies.
+
+### Quoted images
+
+QQ puts the attachments of a quoted message in `msg_elements[<refMsgIdx>].attachments`. This fork downloads those attachments into the session media directory and gives the agent a **local absolute path**, instead of only saying “（引用了 image/png）”.
+
+### Permissions
+
+New sessions default to `read-only`:
+
+- `permissionPreset` defaults to `read-only`;
+- `newSessionsReadOnly` defaults to on: newly created or adopted sessions are forced to read-only even if the state file still contains an old `danger-full-access`;
+- Existing sessions remain locked by DSH; the plugin never changes them silently.
+
+To let a new session act, disable the read-only lock and pick “workspace-write” or “danger-full-access”. This friction is intentional: anyone in the group can trigger the agent, so it must not write files by default.
+
+### Token optimization
+
+`presenceNote` (the channel-context note) is sent only with the **first prompt of each new conversation**. The runtime checks whether the host session already contains user/assistant/tool/developer messages; only a blank session gets the note. Group `[群聊]` context is still attached to every group message.
+
+## Install
+
+### From npm (recommended)
+
+```bash
+dsh plugin --profile desktop add dsh-qq-plugin-group-expand
+# or
+dsh plugin --profile web add dsh-qq-plugin-group-expand
+```
+
+Or type the package name into DSH's “Add plugin” field:
+
+```
+dsh-qq-plugin-group-expand
+```
+
+### From GitHub
+
+```
+https://github.com/jjjjjsgrmjjjjj/dsh-qq-plugin-group-expand
+```
+
+Paste the Git URL into “Add plugin”, or:
+
+```bash
+dsh plugin --profile web add https://github.com/jjjjjsgrmjjjjj/dsh-qq-plugin-group-expand
+```
+
+### From a local checkout / tarball
+
+```bash
+npm pack
+# → dsh-qq-plugin-group-expand-1.2.0.tgz
+```
+
+Paste the absolute path of the `.tgz`, or the directory containing `package.json`, into “Add plugin”.
+
+### Migrating from the old plugin
+
+1. Disable and remove the old `dsh-qq-plugin` first; otherwise both plugins compete for the same QQ channel and the `qqChannel` service;
+2. Install `dsh-qq-plugin-group-expand`;
+3. The credential scope remains upstream's `dsh-qq-plugin`, so an existing AppSecret can be reused;
+4. The state file is still `~/.dsh/qq/state.json`; session mappings, the pending queue and settings carry over;
+5. After startup, check the connection status in settings and `boot.log`.
+
+## Configuration
+
+Settings match upstream; the group-specific fields live in `lib/settings.js`:
+
+| Setting | Default | Description |
+|---|---|---|
+| `groupChatEnabled` | `true` | Master switch for group chat |
+| `groupPersonaNames` | `鲸鱼娘` | Persona names recognised in groups, comma-separated |
+| `groupAutoSpeak` | `true` | Speak locally when the persona or a keyword appears |
+| `groupFollowUpWindowMs` | `300000` | Continuous-conversation window after an @ (5 minutes) |
+| `groupContextWindowMs` | `120000` | Context window for group history |
+| `groupAutoSpeakKeywords` | `鲸鱼娘,鱼鱼,胖鱼,在吗,哈哈,笑死,可爱,笨蛋` | Conversation keywords |
+| `groupSpeakCooldownMs` | `20000` | Cooldown for local auto-speak |
+| `groupSpeakMaxPerHour` | `20` | Hourly cap for local auto-speak |
+| `groupCollectStickers` | `true` | Collect group stickers |
+| `groupStickerChance` | `70` | Chance of attaching a sticker to a local line |
+| `groupStickerDir` | `<home>/qq/stickers` | Sticker directory |
+| `groupFullMessageMode` | not enabled | Branch for platforms that deliver all group messages; see “Platform boundaries” |
+| `permissionPreset` | `read-only` | Permission preset for new sessions |
+| `newSessionsReadOnly` | `true` | Force new sessions to read-only |
+
+See [`docs/HANDBOOK-USER.md`](docs/HANDBOOK-USER.md) and the built-in help in the settings page for the full list.
+
+## Implementation
+
+| Module | Responsibility |
+|---|---|
+| `index.js` | Plugin entry, service wiring, settings and lifecycle |
+| `lib/runtime.js` | QQ connection, inbound messages, session prompts, assistant stream aggregation, sending |
+| `lib/router.js` | Which DSH session a QQ conversation maps to, plus command parsing |
+| `lib/group.js` | Group gate, persona detection, follow-up window, `[[NO_REPLY]]` |
+| `lib/stickers.js` | Sticker collection, deduplication, limits and index |
+| `lib/prompt.js` | Prompt composition, quote parsing, quoted-attachment extraction |
+| `lib/media.js` | Media download and description |
+| `lib/state.js` | Atomic, serialised state and conversation keys |
+| `lib/credentials.js` | Credential-service adapter (upstream scope) |
+| `client.js` | Settings-page UI |
+
+Key decisions:
+
+1. **Scoped conversation keys**: direct messages use `accountId:peerId`; groups use `accountId:group:groupId`. Bindings, passive targets, the pending queue and attachment parking all use this key.
+2. **Group passive replies reuse the latest @ `msg_id`**: QQ group passive replies only accept the `msg_id` of the most recent @ (valid for 5 minutes). Using a later ordinary message's id makes the platform treat it as a proactive message, which an unverified official bot cannot send. The plugin keeps `#groupAt` per group and reuses it inside the window.
+3. **Quoted images are downloaded first**: QQ attachment URLs expire, so the image is fetched on receipt and the agent receives a local path.
+4. **Channel note is sent once**: host-session messages decide whether the session is new; an in-process `#noteSent` set is a fallback.
+5. **Group history stays in the prompt, with no extra model call**: last 8 messages, 120 characters each, at most 30 entries in memory.
+
+## Tests
+
+Three offline suites run without a DSH host:
+
+```bash
+node scripts/verify.mjs
+node scripts/verify-client.mjs
+node scripts/verify-send-path.mjs
+```
+
+Current results: **836** host checks, **113** client checks, **81** send-path checks.
+
+`verify-send-path.mjs` uses a fake SDK to exercise the real send path, covering:
+
+- direct/group targets, scope and passive `msg_id`;
+- passive-to-proactive fallback and rate limiting;
+- reuse of the latest group @ `msg_id`;
+- read-only enforcement for new sessions;
+- channel note sent once and omitted afterwards;
+- no further submission after the group window closes.
+
+## Platform boundaries and security
+
+1. **Official bots receive only group @ messages by default.** Tencent's `GROUP_AND_C2C_EVENT` subscription includes `GROUP_AT_MESSAGE_CREATE`; ordinary group messages (`GROUP_MESSAGE_CREATE`) require platform-side full-message permission. The code can handle that event, but if no message is delivered there is nothing to judge.
+2. **Unverified bots** can only be used by their administrator; proactive group messages are generally not permitted, and passive replies require a valid `msg_id`.
+3. **No personal-account protocol**, no shared personal QQ account, and no public callback URL.
+4. **Group members can trigger the agent.** The read-only lock is the safety baseline; do not enable “full access” in a group casually.
+5. Stickers collected from groups are uploaded by members; verify content and copyright before use.
+
+## Known limitations
+
+- With the official channel, non-@ group messages are invisible by default; this needs platform permission and cannot be bypassed by the plugin.
+- `sendTyping` is supported only for direct messages; group use records a non-fatal error.
+- Group history lives in memory and starts empty after a DSH restart.
+- Stickers support images only, not QQ's animated-sticker protocol.
+
+## License and credits
+
+MIT License. Upstream: [`xcisxc29/dsh-qq-plugin`](https://github.com/xcisxc29/dsh-qq-plugin). Group chat, stickers, quoted images, permission defaults and token savings are developed on top of it in this fork; please file issues in this repository.
+
+</details>
