@@ -1,0 +1,14 @@
+# QQ 官方机器人渠道。
+#
+# 只插一行 Host 插件。设置页路由、会话控制器、助手流等全部通过 `inject` 从运行中的组合里读，
+# 与 dsh-wechat-plugin 的写法一致（这是官方模板与已装插件的共同范式）。
+#
+# 行 id、包名必须一致（微信插件为此吃过启动审计拒绝的苦）。
+#
+# `autoStart` 为 true 时在 apply 阶段就用已存凭据重连；为 false 则等设置页手动开启。
+
+- insert:
+    - id: dsh-qq-plugin-group-expand
+      name: 'dsh-qq-plugin-group-expand'
+      config:
+        autoStart: true

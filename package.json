@@ -1,0 +1,58 @@
+{
+  "name": "dsh-qq-plugin-group-expand",
+  "version": "1.2.0",
+  "type": "module",
+  "description": "QQ channel for DeepSeek Harness: drive the agent on your computer from your phone in QQ. Runs on Tencent's official QQ bot platform, so no public IP and no reverse proxy are needed.",
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "qq",
+    "qqbot",
+    "tencent",
+    "chatbot",
+    "channel",
+    "plugin",
+    "remote-control"
+  ],
+  "homepage": "https://github.com/jjjjjsgrmjjjjj/dsh-qq-plugin-group-expand#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jjjjjsgrmjjjjj/dsh-qq-plugin-group-expand.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jjjjjsgrmjjjjj/dsh-qq-plugin-group-expand/issues"
+  },
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "docs",
+    "tools",
+    "README.md",
+    "README.zh.md",
+    "LICENSE"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@tencent-connect/qqbot-connector": "1.2.0",
+    "@tencent-connect/qqbot-nodejs": "^1.0.4",
+    "qrcode": "^1.5.4"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true
+    }
+  }
+}

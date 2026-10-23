@@ -1,0 +1,37 @@
+# Packing rules — and the reason this file has to exist at all.
+#
+# `.gitignore` and `.npmignore` look like the same kind of file, and they are not. The pack step
+# applies npm's own ignore rules; when a package has no `.npmignore`, npm **falls back to
+# `.gitignore`**. A rule written to keep a local directory out of Git therefore also decides what
+# ships in the tarball, and nothing warns you about the second effect.
+#
+# That is a real incident here, not a theory: dsh-wechat's `.gitignore` excluded `lib/` (build output
+# in that project), a Git install consequently packed a plugin whose entry point was missing, and
+# the install succeeded while the plugin could not load. Both symptoms landed on the user, neither
+# pointed at `.gitignore`.
+#
+# This file is an **exclusion** list: what is not named here is packed. So it is written to name
+# only things that have no business in an installed copy — never `lib/`, `index.js`, `client.js`,
+# `cordis.patch.yml`, `docs/`, `tools/`, `README.md`, `README.zh.md` or `LICENSE`.
+#
+# It does not override the `files` field in package.json, which is the primary allowlist. It is here
+# so that the tarball's contents are decided by a file whose intent is packaging.
+#
+# `tools/` stays in the package on purpose, alongside `lib/`: those checkers are part of what a
+# reader of the installed source should be able to find and run.
+
+# Local checks. They need real bot credentials and a live profile, so they mean nothing to a user.
+smoke/
+.verify/
+.smoke/
+*.log
+
+# The test suites themselves — useful to a contributor working in a checkout, not to an install.
+scripts/
+
+# Repository furniture.
+.github/
+.gitignore
+.gitattributes
+package-lock.json
+*.tgz

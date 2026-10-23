@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+
+# Local verification artifacts
+.verify/
+.smoke/
+
+# Packed tarballs
+*.tgz
+
+# Editor and OS noise
+.DS_Store
+Thumbs.db
+*.log
+
+# ⚠️ Never commit `.npmrc`.
+#
+# A developer's `~/.npmrc` often holds a plaintext publish token —
+#
+#     //registry.npmjs.org/:_authToken=npm_…
+#
+# — and a project-level `.npmrc` is exactly where people put one when they need it. This repository
+# is published publicly, so a single `git add -A` would put that token on the internet with **publish
+# rights to the npm account**.
+#
+# It matters less than it used to, because `publish.yml` authenticates with OIDC and needs no token
+# at all — there is deliberately no `NPM_TOKEN` anywhere in this repo. But a `.npmrc` can still be
+# created by a tool, by an editor, or by hand, so the ignore rule stays.
+.npmrc
+
+# ⚠️ `lib/` is deliberately NOT here.
+#
+# In this package `lib/` is source code, not build output — there is no build step at all. It holds
+# every module the plugin is made of, and `index.js` requires them.
+#
+# Adding `lib/` to this file would also, silently, remove it from the published tarball: npm's pack
+# step consults `.gitignore` when a package has no `.npmignore` entry of its own, so a rule written
+# to keep a local directory out of Git ends up deciding what users install. That is exactly how
+# dsh-wechat once shipped a plugin with no entry point to load. See `.npmignore` for the other half
+# of this.
